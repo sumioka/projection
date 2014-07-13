@@ -1,0 +1,76 @@
+<html>
+<head>
+<title>ƒeƒXƒg</title>
+<script type="text/javascript">
+<!--
+var obj;
+var offsetX;
+var offsetY;
+
+function doInit() {
+   if (document.layers /* Netscape Communicator 4.* */) {
+      objlist = document.layers;
+   } else if (document.all /* Internet Explorer 5.* */) {
+      objlist = document.all.tags("SPAN");
+   } else if (document.getElementsByTagName /* Netscape 6 */) {
+      objlist = document.getElementsByTagName("SPAN");
+   } else {
+      return;
+   }
+   for (i = 0; i < objlist.length; i++) {
+      if (document.layers) {
+         objlist[i].captureEvents(Event.MOUSEDOWN);
+      }
+      objlist[i].onmousedown = onMouseDown;
+   }
+   if (document.layers) {
+      document.captureEvents(Event.MOUSEMOVE | Event.MOUSEUP);
+   }
+   document.onmousemove = onMouseMove;
+   document.onmouseup = onMouseUp;
+}
+function onMouseDown(e) {
+   obj = this;
+   if (document.layers) {
+      offsetX = e.layerX;
+      offsetY = e.layerY;
+   } else if (document.all) {
+      offsetX = event.offsetX + 2;
+      offsetY = event.offsetY + 2;
+   } else if (obj.getElementsByTagName) {
+      offsetX = e.pageX - parseInt(obj.style.left);
+      offsetY = e.pageY - parseInt(obj.style.top);
+   }
+   return false;
+}
+function onMouseMove(e) {
+   if (!obj) {
+      return true;
+   }
+   if (document.layers) {
+      obj.pageX = e.pageX - offsetX;
+      obj.pageY = e.pageY - offsetY;
+   } else if (document.all) {
+      obj.style.left = event.clientX - offsetX + document.body.scrollLeft;
+      obj.style.top = event.clientY - offsetY + document.body.scrollTop;
+   } else if (obj.getElementsByTagName) {
+      obj.style.left = e.pageX - offsetX;
+      obj.style.top = e.pageY - offsetY;
+   }
+   return false;
+}
+function onMouseUp(e) {
+   obj = null;
+}
+//-->
+</script>
+</head>
+<body onload="doInit()" bgcolor="#000000">
+
+<span style="position:absolute; top:150px; left:150px; width:80px;">
+<video  id="video1" src="./nc52475tama.mp4" width=120 height=120 autoplay loop></video>
+</span>
+
+</body>
+</html>
+

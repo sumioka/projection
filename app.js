@@ -5,6 +5,7 @@
 
 var express = require('express');
 var routes = require('./routes');
+var connect = require('connect');
 var user = require('./routes/user');
 var http = require('http');
 var path = require('path');
@@ -14,7 +15,8 @@ var app = express();
 // all environments
 app.set('port', process.env.PORT || 3000);
 app.set('views', path.join(__dirname, 'views'));
-app.set('view engine', 'jade');
+//app.set('view engine', 'jade');
+app.set('view engine', 'ejs');
 app.use(express.favicon());
 app.use(express.logger('dev'));
 app.use(express.json());
@@ -29,8 +31,32 @@ if ('development' == app.get('env')) {
 }
 
 app.get('/', routes.index);
-app.get('/users', user.list);
+app.post('/', routes.index);
+//app.get('/users', user.list);
 
-http.createServer(app).listen(app.get('port'), function(){
+
+
+
+var server = http.createServer(app);
+server.listen(app.get('port'), function(){
   console.log('Express server listening on port ' + app.get('port'));
 });
+
+
+
+// socket.io 利用
+var socketIO = require("socket.io");
+var io = socketIO.listen(server);
+
+io.sockets.on('connection', function(socket){
+	console.log("connection");
+	socket.on('message', function(data) {
+		console.log("message");
+		io.sockets.emit('message', {value: data.value});
+	});
+
+	socket.on('disconnect',function(){
+		console.log("disconnect");
+	});
+});
+

@@ -1,7 +1,9 @@
 <html>
 <head>
 <title>light ball</title>
-<script type="text/javascript">
+<script src="http://code.jquery.com/jquery-1.11.0.min.js"></script>
+<script src="http://code.jquery.com/jquery-migrate-1.2.1.min.js"></script>http
+http<script type="text/javascript">
 <!--
 var obj;
 var offsetX;
@@ -60,18 +62,44 @@ function onMouseMove(e) {
    return false;
 }
 function onMouseUp(e) {
+   if(event.clientX < 20) {
+      deleteBall(obj);
+   }
    obj = null;
 }
+
+function createBall(options){
+   if(!options){
+      options = {};
+   }
+   if(!options.id){
+      options.id = Math.floor(Math.random() * 100000000000);
+   }
+   $("body").append(
+      '<span id="span' + options.id + '" style="position:absolute; top:150px; left:150px; width:120px; height:120px;"><video src="./nc52475tama.mp4" width=120 height=120 autoplay loop></video></span>'
+   );
+
+   $("#span" + options.id).mousedown(onMouseDown);
+
+}
+
+function deleteBall(options){
+   // XXX: これだとjquery上では消えていないらしい
+   $("#" + options.id).remove();
+} 
+
 //-->
 </script>
 </head>
 <body onload="doInit()" bgcolor="#000000">
 
-<span style="position:absolute; top:150px; left:150px; width:80px;">
+<button onClick="javascript:createBall()">Make</button>
+
+<span id="span1" style="position:absolute; top:150px; left:150px; width:120px;">
 <video  id="video1" src="./nc52475tama.mp4" width=120 height=120 autoplay loop></video>
 </span>
 
-<span style="position:absolute; top:150px; left:300px; width:80px;">
+<span id="span2" style="position:absolute; top:150px; left:300px; width:120px;">
 <video  id="video2" src="./nc52475tama.mp4" width=120 height=120 autoplay loop></video>
 </span>
 

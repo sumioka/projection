@@ -3,6 +3,7 @@
 <title>light ball</title>
 <script src="http://code.jquery.com/jquery-1.11.0.min.js"></script>
 <script src="http://code.jquery.com/jquery-migrate-1.2.1.min.js"></script>
+<script src="/socket.io/socket.io.js"></script>
 <script type="text/javascript">
 <!--
 var obj;
@@ -90,10 +91,14 @@ function deleteBall(options){
 
 //-->
 </script>
+
+
 </head>
 <body onload="doInit()" bgcolor="#000000">
 
 <button onClick="javascript:createBall()">Make</button>
+<span id="connectId"></span>
+<span id="receiveMsg"></span>
 
 <span id="span1" style="position:absolute; top:150px; left:150px; width:120px;">
 <video  id="video1" src="./nc52475tama.mp4" width=120 height=120 autoplay loop></video>

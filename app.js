@@ -35,6 +35,12 @@ app.post('/', routes.index);
 //app.get('/users', user.list);
 
 
+var balls = {"id": "options"}; // {id1: options1, id2: options2, ...}
+
+app.get('/balls',function(req,res){
+	res.send(JSON.stringify(balls));
+});
+
 
 
 var server = http.createServer(app);

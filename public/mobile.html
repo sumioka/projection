@@ -1,0 +1,184 @@
+<html>
+<head>
+<title>light ball</title>
+<!--
+<script src="http://code.jquery.com/jquery-1.11.0.min.js"></script>
+<script src="http://code.jquery.com/jquery-migrate-1.2.1.min.js"></script>
+-->
+<script src="javascripts/jquery-1.11.1.min.js"></script>
+<script src="/socket.io/socket.io.js"></script>
+<script type="text/javascript">
+<!--
+var obj;
+var offsetX;
+var offsetY;
+
+function doInit() {
+   if (document.layers /* Netscape Communicator 4.* */) {
+      objlist = document.layers;
+   } else if (document.all /* Internet Explorer 5.* */) {
+      objlist = document.all.tags("SPAN");
+   } else if (document.getElementsByTagName /* Netscape 6 */) {
+      objlist = document.getElementsByTagName("SPAN");
+   } else {
+      return;
+   }
+   for (i = 0; i < objlist.length; i++) {
+      if (document.layers) {
+         objlist[i].captureEvents(Event.MOUSEDOWN);
+      }
+      objlist[i].onmousedown = onMouseDown;
+   }
+   if (document.layers) {
+      document.captureEvents(Event.MOUSEMOVE | Event.MOUSEUP);
+   }
+   document.onmousemove = onMouseMove;
+   document.onmouseup = onMouseUp;
+
+   createBall();
+}
+function onMouseDown(e) {
+   obj = this;
+   if (document.layers) {
+      offsetX = e.layerX;
+      offsetY = e.layerY;
+   } else if (document.all) {
+      offsetX = event.offsetX + 2;
+      offsetY = event.offsetY + 2;
+   } else if (obj.getElementsByTagName) {
+      offsetX = e.pageX - parseInt(obj.style.left);
+      offsetY = e.pageY - parseInt(obj.style.top);
+   }
+   return false;
+}
+function onMouseMove(e) {
+   if (!obj) {
+      return true;
+   }
+   var x,y;
+   if (document.layers) {
+      x = obj.pageX = e.pageX - offsetX;
+      y = obj.pageY = e.pageY - offsetY;
+   } else if (document.all) {
+      x = obj.style.left = event.clientX - offsetX + document.body.scrollLeft;
+      y = obj.style.top = event.clientY - offsetY + document.body.scrollTop;
+   } else if (obj.getElementsByTagName) {
+      x = obj.style.left = e.pageX - offsetX;
+      y = obj.style.top = e.pageY - offsetY;
+   }
+
+   SendMsg(JSON.stringify({method:"move", options:{x:x,y:y,id:obj.id,termId:socket.io.engine.id}}));
+   return false;
+}
+function onMouseUp(e) {
+   if(event.clientX < 20) {
+      deleteBall(obj);
+   }
+   obj = null;
+}
+
+function createBall(options, recv){
+   if(!options){
+      options = {};
+   }
+   if(!options.id){
+      options.id = Math.floor(Math.random() * 100000000000);
+   }
+
+   $("body").append(
+      '<span id="span' + options.id + '" style="position:absolute; top:150px; left:150px; width:120px; height:120px;"><video src="./nc52475tama.mp4" width=120 height=120 autoplay loop></video></span>'
+   );
+
+   $("#span" + options.id).mousedown(onMouseDown);
+
+   if(!recv){
+     SendMsg(JSON.stringify({method:"create", options:{x:150,y:150,id: options.id,termId:socket.io.engine.id}}));    
+   }
+}
+
+function deleteBall(options, recv){
+   // XXX: これだとjquery上では消えていないらしい
+   $("#" + options.id).remove();
+
+   if(!recv) {
+     SendMsg(JSON.stringify({method:"delete", options:{id:options.id,termId:socket.io.engine.id}}));  
+   }
+} 
+
+//　TODO
+function moveBall(options, recv){
+   var obj = $("#" + options.id);
+   if(obj){  
+     obj.css("top", options.y);
+     obj.css("left", options.x);
+   }
+}
+
+//var socket = io.connect('http://localhost:3000');
+var socket = io.connect('http://lightball.heroku.com');
+socket.on('connect', function(msg) {
+  console.log("connet");
+  document.getElementById("connectId").innerHTML = 
+    "あなたの接続ID::" + socket.io.engine.id;
+});
+
+// メッセージを受けたとき
+socket.on('message', function(msg) {
+   // メッセージを画面に表示する
+   document.getElementById("receiveMsg").innerHTML = msg.value;
+   if(msg.value){
+      try{
+         var msgObj = JSON.parse(msg.value);
+         switch(msgObj.method){
+            case "create":
+//               createBall(msgObj.options, true);
+               break;
+            case "move":
+               moveBall(msgObj.options, true);
+               break;
+            case "delete":
+               deleteBall(msgObj.options, true);
+               break;
+            case "disconnect":
+            default:
+
+         }
+      } catch (error){
+         document.getElementById("errorMsg").innerHTML = error;
+      }
+   }
+});
+
+// メッセージを送る
+function SendMsg(msg) {
+//  var msg = document.getElementById("message").value;
+  // メッセージを発射する
+  socket.emit('message', { value: msg });
+}
+// 切断する
+function DisConnect() {
+  var msg = JSON.stringify({method:disconnect, options:{termId:socket.io.engine.id}});
+  // メッセージを発射する
+  socket.emit('message', { value: msg });
+  // socketを切断する
+  socket.disconnect();
+}
+
+//-->
+</script>
+
+
+</head>
+<body onload="doInit()" bgcolor="#000000">
+
+<button onClick="javascript:createBall()">Make</button>
+<font color="#444444">
+   <span id="connectId"></span><br/>
+   <span id="receiveMsg"></span>
+   <span id="errorMsg"></span>
+</font>
+
+
+</body>
+</html>
+

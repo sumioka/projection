@@ -84,10 +84,10 @@ function createBall(options, recv){
    }
 
    $("body").append(
-      '<span id="span' + options.id + '" style="position:absolute; top:150px; left:150px; width:120px; height:120px;"><video src="./nc52475tama.mp4" width=120 height=120 autoplay loop></video></span>'
+      '<span id="' + options.id + '" style="position:absolute; top:150px; left:150px; width:120px; height:120px;"><video src="./nc52475tama.mp4" width=120 height=120 autoplay loop></video></span>'
    );
 
-   $("#span" + options.id).mousedown(onMouseDown);
+   $("#" + options.id).mousedown(onMouseDown);
 
    if(!recv){
      SendMsg(JSON.stringify({method:"create", options:{x:150,y:150,id: options.id,termId:socket.io.engine.id}}));    

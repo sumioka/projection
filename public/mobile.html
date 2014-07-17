@@ -27,7 +27,7 @@ function doInit() {
       if (document.layers) {
          objlist[i].captureEvents(Event.MOUSEDOWN);
       }
-      objlist[i].onmousedown = onMouseDown;
+      objlist[i].ontouchstart = onMouseDown;
    }
    if (document.layers) {
       document.captureEvents(Event.MOUSEMOVE | Event.MOUSEUP);

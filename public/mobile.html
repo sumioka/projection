@@ -32,8 +32,8 @@ function doInit() {
    if (document.layers) {
       document.captureEvents(Event.MOUSEMOVE | Event.MOUSEUP);
    }
-   document.onmousemove = onMouseMove;
-   document.onmouseup = onMouseUp;
+   document.ontouchmove = onMouseMove;
+   document.ontouchend = onMouseUp;
 
    createBall();
 }
@@ -89,7 +89,7 @@ function createBall(options, recv){
       '<span id="span' + options.id + '" style="position:absolute; top:150px; left:150px; width:120px; height:120px;"><img src="./images/pic_nc52475tama.gif" width="100"></img></span>'
    );
 
-   $("#span" + options.id).mousedown(onMouseDown);
+   $("#span" + options.id).ontouchstart(onMouseDown);
 
    if(!recv){
      SendMsg(JSON.stringify({method:"create", options:{x:150,y:150,id: options.id,termId:socket.io.engine.id}}));    

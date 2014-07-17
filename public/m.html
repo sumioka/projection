@@ -1,0 +1,113 @@
+<html>
+  <head>
+    <meta charset=utf-8 />
+    <title>light ball2</title>
+    <meta name="viewport" content="width=device-width; initial-scale=1.0; maximum-scale=1.0; minimum-scale=1.0; user-scalable=0;" />
+    <script class="jsbin" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <style type="text/css">
+      .draggable {
+        position: absolute;
+        left: 30px;
+        top: 30px;
+        width: 60px;
+        height: 60px;
+        margin-left: -30px;
+        margin-top: -30px;
+
+        color: #FFF;
+        font: bold 16px Helvetica,Arial,Sans-serif;
+        text-align: center;
+        background-color: #ABF;
+        border: 3px solid #669;
+      }
+    </style>
+  </head>
+  <body>
+    <font color="#444444">
+       <span id="connectId"></span><br/>
+       <span id="receiveMsg"></span>
+       <span id="errorMsg"></span>
+    </font>
+    <div class="draggable">Drag me!</div>
+  </body>
+    <script type="text/javascript">
+      $.fn.draggable = function() {
+        var offset = null;
+        var start = function(e) {
+          var orig = e.originalEvent;
+          var pos = $(this).position();
+          offset = {
+            x: orig.changedTouches[0].pageX - pos.left,
+            y: orig.changedTouches[0].pageY - pos.top
+          };
+          SendMsg(JSON.stringify({method:"create", options:{x:pos.left,y:pos.top,id: socket.io.engine.id,termId:socket.io.engine.id}}));    
+        };
+        var moveMe = function(e) {
+          e.preventDefault();
+          var orig = e.originalEvent;
+          $(this).css({
+            top: orig.changedTouches[0].pageY - offset.y,
+            left: orig.changedTouches[0].pageX - offset.x
+          });
+        };
+        this.bind("touchstart", start);
+        this.bind("touchmove", moveMe);
+      };
+
+      $(".draggable").draggable();
+
+
+      var socket = io.connect('http://lightball.herokuapp.com');
+      socket.on('connect', function(msg) {
+        console.log("connet");
+        document.getElementById("connectId").innerHTML = 
+          "あなたの接続ID::" + socket.io.engine.id;
+      });
+
+      // メッセージを受けたとき
+      socket.on('message', function(msg) {
+         // メッセージを画面に表示する
+         document.getElementById("receiveMsg").innerHTML = msg.value;
+         if(msg.value){
+            try{
+               var msgObj = JSON.parse(msg.value);
+               switch(msgObj.method){
+                  case "create":
+                     break;
+                  case "move":
+                     moveBall(msgObj.options, true);
+                     break;
+                  case "delete":
+                     deleteBall(msgObj.options, true);
+                     break;
+                  case "disconnect":
+                  default:
+
+               }
+            } catch (error){
+               document.getElementById("errorMsg").innerHTML = error;
+            }
+         }
+      });
+
+      // メッセージを送る
+      function SendMsg(msg) {
+      //  var msg = document.getElementById("message").value;
+        // メッセージを発射する
+        socket.emit('message', { value: msg });
+      }
+      // 切断する
+      function DisConnect() {
+        var msg = JSON.stringify({method:disconnect, options:{termId:socket.io.engine.id}});
+        // メッセージを発射する
+        socket.emit('message', { value: msg });
+        // socketを切断する
+        socket.disconnect();
+      }
+
+      //-->
+
+
+    </script>
+</html>

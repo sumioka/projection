@@ -29,7 +29,7 @@
        <span id="receiveMsg"></span>
        <span id="errorMsg"></span>
     </font>
-    <div class="draggable">Drag me!</div>
+    <div id="div1" class="draggable">Drag me!</div>
   </body>
     <script type="text/javascript">
       $.fn.draggable = function() {
@@ -64,7 +64,15 @@
         document.getElementById("connectId").innerHTML = 
           "あなたの接続ID::" + socket.io.engine.id;
 
-        SendMsg(JSON.stringify({method:"create", options:{x:pos.left,y:pos.top,id: socket.io.engine.id,termId:socket.io.engine.id}}));    
+        SendMsg(JSON.stringify({
+          method:"create",
+          options:{
+            x: $("#div1").position().left,
+            y: $("#div1").position().top,
+            id: socket.io.engine.id,
+            termId:socket.io.engine.id
+          }
+        }));    
       });
 
       // メッセージを受けたとき
@@ -78,10 +86,10 @@
                   case "create":
                      break;
                   case "move":
-                     moveBall(msgObj.options, true);
+                     //moveBall(msgObj.options, true);
                      break;
                   case "delete":
-                     deleteBall(msgObj.options, true);
+                     //deleteBall(msgObj.options, true);
                      break;
                   case "disconnect":
                   default:

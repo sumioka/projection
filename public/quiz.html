@@ -1,0 +1,349 @@
+<html>
+<head>
+<title>インタラクティブプロジェクション</title>
+<!--
+<script src="http://code.jquery.com/jquery-1.11.0.min.js"></script>
+<script src="http://code.jquery.com/jquery-migrate-1.2.1.min.js"></script>
+-->
+<style type="text/css">
+	span#score_red{
+		margin-left: 600px;
+		font-size: xx-large;
+		color:#ff0000;
+	}
+	span#vs{
+		font-size: xx-large;
+		color:#ddddff;
+	}
+	span#score_white{
+		font-size: xx-large;
+		color:#ffffff;
+	}
+
+	span.user-red{
+		font-size: x-large;
+		color:#ff0000;
+	}
+	span.user-white{
+		font-size: x-large;
+		color:#ffffff;
+	}
+	div#desc{
+		margin-left: 70px;
+		font-size: x-large;
+		color:#00ffff;
+	}
+
+	h1{
+		color:#aaaaff;
+		padding:30px;
+		font-size: xx-large;
+	}
+	table{
+		padding:50px;
+		width:80%;
+	}
+	td {
+		padding:80px;
+		color:#aaaaff;
+		font-size: xx-large;
+		text-align: left;
+	}
+</style>
+<script src="javascripts/jquery-1.11.1.min.js"></script>
+<script src="/socket.io/socket.io.js"></script>
+<script type="text/javascript">
+<!--
+var obj;
+var offsetX;
+var offsetY;
+
+var score_white = 0;
+var score_red = 0;
+
+function answerresult( options ){
+	if ( options.result == 'true' ){
+		$("#" + options.id).css( { 'background':'rgba(255,255,0,0.8)',
+						'background-image':'hanamaru.gif'});
+		if ( options.team == 'red' ){
+			score_red++;
+		}else if ( options.team == 'white' ){
+			score_white++;
+		}
+		$( '#score_red' ).html( score_red );
+		$( '#vs' ).html( ":" );
+		$( '#score_white' ).html( score_white );
+	}
+}
+
+function quizstart( options ){
+	$( '#q' ).html( options.problem );
+	$( '#a_1' ).html( "1&nbsp;&nbsp;" + options.answer_1 );
+	$( '#a_2' ).html( "2&nbsp;&nbsp;" + options.answer_2 );
+	$( '#a_3' ).html( "3&nbsp;&nbsp;" + options.answer_3 );
+	$( '#a_4' ).html( "4&nbsp;&nbsp;" + options.answer_4 );
+}
+
+function timelimit( options ){
+	$( '#desc' ).html( options.description );
+
+	$('#a_'+ options.answer).css( {'color':'#ffff00',
+			'border': '2px #ffff00 solid'} );
+}
+
+function reset(){
+	console.log( "reset called" );
+
+	$( '#score_red' ).html( '');
+	$( '#vs' ).html( '');
+	$( '#score_white' ).html( '');
+
+	score_red = 0;
+	score_white = 0;
+
+	$('#a_1' ).css( {'background-color' : '#000000',
+			'border':'0px',
+			 'color':'#aaaaff'} );
+	$('#a_2' ).css( {'background-color' : '#000000',
+			'border':'0px',
+			 'color':'#aaaaff'} );
+	$('#a_3' ).css( {'background-color' : '#000000',
+			'border':'0px',
+			 'color':'#aaaaff'} );
+	$('#a_4' ).css( {'background-color' : '#000000',
+			'border':'0px',
+			 'color':'#aaaaff'} );
+
+	$('[class^=user]').css( {'background-color':'rgba(0,0,0,0)'} );
+	$( '#desc' ).html( '' );
+}
+
+function doInit() {
+   if (document.layers /* Netscape Communicator 4.* */) {
+      objlist = document.layers;
+   } else if (document.all /* Internet Explorer 5.* */) {
+      objlist = document.all.tags("SPAN");
+   } else if (document.getElementsByTagName /* Netscape 6 */) {
+      objlist = document.getElementsByTagName("SPAN");
+   } else {
+      return;
+   }
+   for (i = 0; i < objlist.length; i++) {
+      if (document.layers) {
+         objlist[i].captureEvents(Event.MOUSEDOWN);
+      }
+      objlist[i].onmousedown = onMouseDown;
+   }
+   if (document.layers) {
+      document.captureEvents(Event.MOUSEMOVE | Event.MOUSEUP);
+   }
+   document.onmousemove = onMouseMove;
+   document.onmouseup = onMouseUp;
+}
+function onMouseDown(e) {
+   obj = this;
+   if (document.layers) {
+      offsetX = e.layerX;
+      offsetY = e.layerY;
+   } else if (document.all) {
+      offsetX = event.offsetX + 2;
+      offsetY = event.offsetY + 2;
+   } else if (obj.getElementsByTagName) {
+      offsetX = e.pageX - parseInt(obj.style.left);
+      offsetY = e.pageY - parseInt(obj.style.top);
+   }
+   return false;
+}
+function onMouseMove(e) {
+   if (!obj) {
+      return true;
+   }
+   var x,y;
+   if (document.layers) {
+      x = obj.pageX = e.pageX - offsetX;
+      y = obj.pageY = e.pageY - offsetY;
+   } else if (document.all) {
+      x = obj.style.left = event.clientX - offsetX + document.body.scrollLeft;
+      y = obj.style.top = event.clientY - offsetY + document.body.scrollTop;
+   } else if (obj.getElementsByTagName) {
+      x = obj.style.left = e.pageX - offsetX;
+      y = obj.style.top = e.pageY - offsetY;
+   }
+
+   SendMsg(JSON.stringify({method:"move", options:{x:x,y:y,id:obj.id,termId:socket.io.engine.id}}));
+   return false;
+}
+function onMouseUp(e) {
+   if(event.clientX < 20) {
+      deleteBall(obj);
+   }
+   obj = null;
+}
+
+function createBall(options, recv ){
+
+	console.log( "create ball called" );
+
+   if(!options){
+      options = {};
+   }
+   if(!options.id){
+      options.id = Math.floor(Math.random() * 100000000000);
+   }
+
+   if ( !options.team ){
+	   options.team = "red";
+   }
+
+   console.log( 'id=' + options.id );
+
+   $("body").append(
+      '<span id="' + options.id + '" class="user-' + options.team + '" style="padding:10px; position:absolute; top:150px; left:150px;">' + options.name + '</span>'
+   );
+
+   $("#" + options.id).mousedown(onMouseDown);
+
+   if(!recv){
+     SendMsg(JSON.stringify({method:"create", options:{x:150,y:150,id: options.id,termId:socket.io.engine.id}}));    
+   }
+
+}
+
+function deleteBall(options, recv){
+   // XXX: これだとjquery上では消えていないらしい
+   $("#" + options.id).remove();
+
+   if(!recv) {
+     SendMsg(JSON.stringify({method:"delete", options:{id:options.id,termId:socket.io.engine.id}}));  
+   }
+} 
+
+//　TODO
+function moveBall(options, recv){
+   var obj = $("#" + options.id);
+   obj.css("top", options.y);
+   obj.css("left", options.x);
+}
+
+//var socket = io.connect('http://localhost:3000');
+var socket = io.connect('http://lightball.herokuapp.com');
+socket.on('connect', function(msg) {
+  console.log("connet");
+  //document.getElementById("connectId").innerHTML = 
+   // "あなたの接続ID::" + socket.io.engine.id;
+});
+
+// メッセージを受けたとき
+socket.on('message', function(msg) {
+	console.log("message received:" + msg.value);
+   // メッセージを画面に表示する
+//   document.getElementById("receiveMsg").innerHTML = msg.value;
+   if(msg.value){
+      try{
+         var msgObj = JSON.parse(msg.value);
+         switch(msgObj.method){
+	    case "answerresult":
+                answerresult(msgObj.options, true );
+	 	break;
+	    case "useradd":
+                useradd(msgObj.options, true );
+	 	break;
+	    case "quizstart":
+	    	reset();
+                quizstart(msgObj.options, true );
+	 	break;
+	    case "timelimit":
+                timelimit(msgObj.options, true );
+	 	break;
+            case "move":
+               moveBall(msgObj.options, true);
+               break;
+
+            case "delete":
+               deleteBall(msgObj.options, true);
+               break;
+
+
+            case "create":
+               createBall(msgObj.options, true );
+               break;
+            case "disconnect":
+            default:
+
+         }
+      } catch (error){
+         document.getElementById("errorMsg").innerHTML = error;
+      }
+   }
+});
+
+
+// メッセージを送る
+function SendMsg(msg) {
+//  var msg = document.getElementById("message").value;
+  // メッセージを発射する
+  socket.emit('message', { value: msg });
+}
+// 切断する
+function DisConnect() {
+  var msg = JSON.stringify({method:disconnect, options:{termId:socket.io.engine.id}});
+  // メッセージを発射する
+  socket.emit('message', { value: msg });
+  // socketを切断する
+  socket.disconnect();
+}
+
+//-->
+</script>
+
+
+</head>
+<body onload="doInit()" bgcolor="#000000">
+
+<font color="white">
+<h1 id="q"></h1>
+</font>
+<div id="desc"></div>
+<span id="score_red"></span><span id="vs"></span><span id="score_white"></span>
+
+<table>
+<tr><td id="a_1"></td><td id="a_2"></td></tr>
+<tr><td id="a_3"></td><td id="a_4"></td>
+</tr></table>
+
+
+
+<button onClick="javascript:reset();quizstart({'problem':'社長の名前は？',
+	'answer_1':'山本五十六',
+	'answer_2':'山本卓巳',
+	'answer_3':'山本正巳',
+	'answer_4':'山本正己'
+	})">QuizStart</button>
+<button onClick="javascript:createBall({'team':'red','name':'山岡','id':'123'})">add_yamaoka</button>
+<button onClick="javascript:createBall({'team':'white','name':'角岡','id':'abc'})">add_sumioka</button>
+<button onClick="javascript:timelimit({'answer':'1','description':'私が社長だ！'})">timelimit</button>
+<button onClick="javascript:answerresult({'result':'true','id':'123','team':'red' })">answerresult</button>
+<button onClick="javascript:reset()">reset</button>
+
+
+<!--
+<font color="#444444">
+   <span id="connectId"></span><br/>
+   <span id="receiveMsg"></span>
+   <span id="errorMsg"></span>
+</font>
+-->
+
+<!--
+<span id="span1" style="position:absolute; top:150px; left:150px; width:120px;">
+<video  id="video1" src="./nc52475tama.mp4" width=120 height=120 autoplay loop></video>
+</span>
+
+<span id="span2" style="position:absolute; top:150px; left:300px; width:120px;">
+<video  id="video2" src="./nc52475tama.mp4" width=120 height=120 autoplay loop></video>
+</span>
+-->
+
+</body>
+</html>
+

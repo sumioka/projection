@@ -1,0 +1,25 @@
+<html>
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta charset="utf-8">
+<script lang="javascript"> 
+  function go() {
+    var name = document.getElementById("name").value;
+    var icon = document.getElementById("icon").value;
+
+    var url = "m.html?name=" + name; 
+    if(icon){
+      url += "&icon=" + icon      
+    }
+    location.href = url;
+  }
+</script>
+
+</head>
+<body>
+
+ユーザ名： <input id="name"></input>
+アイコンURL：　<input id="icon"></input>
+<button onclick="go()">登録</button>
+
+</body>
+</html>

@@ -133,7 +133,17 @@
                   case "timelimit":
  //                   if(screen.width / 2)
                     document.getElementById("info").innerHTML = "答えは・・・？";
-
+                    SendMsg(
+                      {
+                        method:answerresult,
+                        options:
+                          {
+                            'result':'true',
+                            'id':socket.io.engine.id,
+                            'team':'red' 
+                          }
+                      }
+                    )
                     break;
                   default:
                }

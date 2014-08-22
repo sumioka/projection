@@ -29,6 +29,8 @@
 
     ユーザ名：<span id="name"></span>, チーム：<span id="team"></span> <br/>
 
+    <span id="info"></span><br/>
+
     <table border="1" width="50%">
       <tr height="200"><td></td><td></tr>
       <tr height="200"><td></td><td></tr>
@@ -126,8 +128,12 @@
                var msgObj = JSON.parse(msg.value);
                switch(msgObj.method){
                   case "quizstart":
+                    document.getElementById("info").innerHTML = "レッツ回答！";
                      break;
                   case "timelimit":
+ //                   if(screen.width / 2)
+                    document.getElementById("info").innerHTML = "答えは・・・？";
+
                     break;
                   default:
                }
@@ -151,7 +157,6 @@
         // socketを切断する
         socket.disconnect();
       }
-
       //-->
 
 

@@ -61,15 +61,28 @@ var offsetY;
 var score_white = 0;
 var score_red = 0;
 
+var timers = new Array();
+
+var ids = new Array();
+
+
 function answerresult( options ){
 	if ( options.result == 'true' ){
-		$("#" + options.id).css( { 'background':'rgba(255,255,0,0.8)',
-						'background-image':'hanamaru.gif'});
+		$("#" + options.id).css( { 'background-color':'rgba(255,255,0,0.8)' });
+
+
+		timers.push(
+			setInterval(function(){ $('#' + options.id ).fadeOut(200,function(){$(this).fadeIn(200)}); },200)
+		);
+
+		
+
 		if ( options.team == 'red' ){
 			score_red++;
 		}else if ( options.team == 'white' ){
 			score_white++;
 		}
+
 		$( '#score_red' ).html( score_red );
 		$( '#vs' ).html( ":" );
 		$( '#score_white' ).html( score_white );
@@ -89,10 +102,25 @@ function timelimit( options ){
 
 	$('#a_'+ options.answer).css( {'color':'#ffff00',
 			'border': '2px #ffff00 solid'} );
+
+
+	for ( var i = 0; i < ids.length; ++i ) {
+			
+	}
+
 }
 
 function reset(){
 	console.log( "reset called" );
+
+
+	for ( var i = 0; i < timers.length; ++i ) {
+		clearInterval( timers[i] );
+	}
+
+	timers = new Array();
+	ids = new Array();
+	
 
 	$( '#score_red' ).html( '');
 	$( '#vs' ).html( '');
@@ -182,6 +210,7 @@ function onMouseUp(e) {
 
 function createBall(options, recv ){
 
+
 	console.log( "create ball called" );
 
    if(!options){
@@ -196,6 +225,8 @@ function createBall(options, recv ){
    }
 
    console.log( 'id=' + options.id );
+
+   ids.push( options.id );
 
    $("body").append(
       '<span id="' + options.id + '" class="user-' + options.team + '" style="padding:10px; position:absolute; top:150px; left:150px;">' + options.name + '</span>'
@@ -221,6 +252,9 @@ function deleteBall(options, recv){
 //　TODO
 function moveBall(options, recv){
    var obj = $("#" + options.id);
+
+
+   console.log( options.x + "/" + options.y );
    obj.css("top", options.y);
    obj.css("left", options.x);
 }
@@ -246,7 +280,7 @@ socket.on('message', function(msg) {
                 answerresult(msgObj.options, true );
 	 	break;
 	    case "useradd":
-                useradd(msgObj.options, true );
+                createBall(msgObj.options );
 	 	break;
 	    case "quizstart":
 	    	reset();

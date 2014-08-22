@@ -1,10 +1,10 @@
-<html>
-  <head>
-    <meta charset=utf-8 />
+
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta charset="utf-8">
     <title>light ball2</title>
-    <meta name="viewport" content="width=device-width; initial-scale=1.0; maximum-scale=1.0; minimum-scale=1.0; user-scalable=0;" />
-    <script class="jsbin" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
-    <script src="/socket.io/socket.io.js"></script>
+    <meta name="viewport" content="width=device-width; initial-scale=1.0; maximum-scale=1.0; minimum-scale=1.0; user-scalable=0;">
+    <script class="jsbin" src="./m_files/jquery.min.js"></script>
+    <script src="./m_files/socket.io.js"></script>
     <style type="text/css">
       .draggable {
         position: absolute;
@@ -25,12 +25,12 @@
   </head>
   <body>
     <font color="#444444">
-       <span id="connectId"></span><br/>
-       <span id="receiveMsg"></span>
+       <span id="connectId">あなたの接続ID::LVSC9FxGbHal-eiHAAAB</span><br>
+       <span id="receiveMsg">{"method":"create","options":{"x":30,"y":30,"id":"LVSC9FxGbHal-eiHAAAB","termId":"LVSC9FxGbHal-eiHAAAB"}}</span>
        <span id="errorMsg"></span>
     </font>
     <div id="div1" class="draggable">Drag me!</div>
-  </body>
+  
     <script type="text/javascript">
       $.fn.draggable = function() {
         var offset = null;
@@ -120,4 +120,4 @@
 
 
     </script>
-</html>
+</body></html>

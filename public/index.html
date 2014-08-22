@@ -84,12 +84,13 @@ function createBall(options, recv){
    }
 
    $("body").append(
-      '<span id="' + options.id + '" style="position:absolute; top:150px; left:150px; width:120px; height:120px;"><video src="./nc52475tama.mp4" width=120 height=120 autoplay loop></video></span>'
-   );
+        '<span id="' + options.id + '" style="position:absolute; top:150px; left:150px; width:120px; height:120px;"><video src="./nc52475tama.mp4" width=120 height=120 autoplay loop></video></span>'
+     );
 
    $("#" + options.id).mousedown(onMouseDown);
 
    if(!recv){
+
      SendMsg(JSON.stringify({method:"create", options:{x:150,y:150,id: options.id,termId:socket.io.engine.id}}));    
    }
 }
@@ -110,8 +111,8 @@ function moveBall(options, recv){
    obj.css("left", options.x);
 }
 
-//var socket = io.connect('http://localhost:3000');
-var socket = io.connect('http://lightball.herokuapp.com');
+var socket = io.connect('http://localhost:3000');
+//var socket = io.connect('http://lightball.herokuapp.com');
 socket.on('connect', function(msg) {
   console.log("connet");
   document.getElementById("connectId").innerHTML = 

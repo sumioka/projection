@@ -115,7 +115,7 @@ var mobile = io.of("/mobile").on("connection", function(socket){
 	
 	// ボールに関するメッセージはビルへ
 	socket.on("ball", function(data){
-		proj.emit("message",  {value: data.value});
+		proj.volatile.emit("message",  {value: data.value});
 	});
 	
 	// 正解は集計？そして、ビルへもメッセージ

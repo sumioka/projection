@@ -158,7 +158,7 @@
       //  var msg = document.getElementById("message").value;
         // メッセージを発射する
 	if(target == "ball"){
-           socket.volatile.emit(target, { value: msg });
+           socket.emit(target, { value: msg });
 	} else {
            socket.emit(target, { value: msg });
 	}

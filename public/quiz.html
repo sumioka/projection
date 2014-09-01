@@ -260,9 +260,9 @@ function moveBall(options, recv){
 }
 
 //var socket = io.connect('http://localhost:3000');
-var socket = io.connect('http://lightball.herokuapp.com');
+var socket = io.connect('http://lightball.herokuapp.com/proj');
 socket.on('connect', function(msg) {
-  console.log("connet");
+  console.log("connect");
   //document.getElementById("connectId").innerHTML = 
    // "あなたの接続ID::" + socket.io.engine.id;
 });

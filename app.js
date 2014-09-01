@@ -39,9 +39,17 @@ var historical_mobiles = 0;
 var running_mobiles = 0;
 
 
-// 成績を計算する
-
-
+// 成績
+var correct = {
+	all: {
+		red : 0,
+		white : 0
+	},
+	now:{
+		red : 0,
+		white : 0
+	}
+};
 
 // server起動
 var server = http.createServer(app);
@@ -88,9 +96,16 @@ var mobile = io.of("/mobile").on("connection", function(socket){
 	
 	// ボールに関するメッセージはビルへ
 	socket.on("ball", function(data){
-		proj.emit("ball", data);
+		proj.emit("message", data);
 	});
 	
+	// 正解は集計？そして、ビルへもメッセージ
+	socket.on("answer", function(data){
+		proj.emit("message", data);
+		
+	});
+
+	// 切断
 	socket.on('disconnect',function(){
 		running_mobiles--;
 		console.log("mobile disconnect");
@@ -116,4 +131,22 @@ app.get("/connections",function(req,res){
 	}
 	res.send(JSON.stringify(connections));
 });
+
+
+// 成績クリア
+app.get("/clearCorrects",function(req,res){
+	
+	correct = {
+		all: {
+			red : 0,
+			white : 0
+		},
+		now:{
+			red : 0,
+			white : 0
+		}
+	};
+	res.send("cleared");
+});
+
 

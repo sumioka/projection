@@ -38,7 +38,7 @@
 
     <!-- debug表示　-->
     <font color="#444444">
-       <span id="connectId">あなたの接続ID::LVSC9FxGbHal-eiHAAAB</span><br>
+       <span id="connectId">あなたの接続ID:: undefined</span><br>
        <span id="receiveMsg">{"method":"create","options":{"x":30,"y":30,"id":"LVSC9FxGbHal-eiHAAAB","termId":"LVSC9FxGbHal-eiHAAAB"}}</span>
        <span id="errorMsg"></span>
     </font>
@@ -89,7 +89,7 @@
             top: orig.changedTouches[0].pageY - offset.y,
             left: orig.changedTouches[0].pageX - offset.x
           });
-          SendMsg(JSON.stringify({method:"move", options:{x:orig.changedTouches[0].pageX - offset.x, y:orig.changedTouches[0].pageY - offset.y,id: socket.io.engine.id,termId:socket.io.engine.id}}));    
+          SendMsg("ball", JSON.stringify({method:"move", options:{x:orig.changedTouches[0].pageX - offset.x, y:orig.changedTouches[0].pageY - offset.y,id: socket.io.engine.id,termId:socket.io.engine.id}}));    
       };
         this.bind("touchstart", start);
         this.bind("touchmove", moveMe);
@@ -99,13 +99,13 @@
 
 
       // 　サーバとのコネクションの作成
-      var socket = io.connect('http://lightball.herokuapp.com');
+      var socket = io.connect('http://lightball.herokuapp.com/mobile');
       socket.on('connect', function(msg) {
         console.log("connect");
         document.getElementById("connectId").innerHTML = 
           "あなたの接続ID::" + socket.io.engine.id;
 
-        SendMsg(JSON.stringify({
+        SendMsg("ball", JSON.stringify({
           method:"useradd",
           options:{
             name: name,
@@ -133,7 +133,7 @@
                   case "timelimit":
  //                   if(screen.width / 2)
                     document.getElementById("info").innerHTML = "答えは・・・？";
-                    SendMsg(
+                    SendMsg("answer",
                       {
                         method:"answerresult",
                         options:
@@ -154,7 +154,7 @@
       });
 
       // メッセージを送る
-      function SendMsg(msg) {
+      function SendMsg(target,msg) {
       //  var msg = document.getElementById("message").value;
         // メッセージを発射する
         socket.emit('message', { value: msg });

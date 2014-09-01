@@ -157,7 +157,7 @@
       function SendMsg(target,msg) {
       //  var msg = document.getElementById("message").value;
         // メッセージを発射する
-        socket.emit('message', { value: msg });
+        socket.emit(target, { value: msg });
       }
       // 切断する
       function DisConnect() {

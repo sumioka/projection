@@ -62,15 +62,34 @@ server.listen(app.get('port'), function(){
 var socketIO = require("socket.io");
 var io = socketIO.listen(server);
 
+
+// 全員
 io.sockets.on('connection', function(socket){
 	console.log("connection");
 	socket.on('message', function(data) {
 		console.log("message");
 		io.sockets.emit('message', {value: data.value});
+		
 	});
 
 	socket.on('disconnect',function(){
 		console.log("disconnect");
+	});
+});
+
+// 運営
+var unnei = io.of("/unnei").on("connection", function(socket){
+	console.log("unnei connection");
+	
+	socket.on('message', function(data) {
+		console.log("message");
+		proj.emit("message",  {value: data.value});
+		mobile.emit("message",  {value: data.value});
+	});
+	
+	// 切断
+	socket.on('disconnect',function(){
+		console.log("unnei disconnect");
 	});
 });
 
@@ -96,12 +115,12 @@ var mobile = io.of("/mobile").on("connection", function(socket){
 	
 	// ボールに関するメッセージはビルへ
 	socket.on("ball", function(data){
-		proj.emit("message", data);
+		proj.emit("message",  {value: data.value});
 	});
 	
 	// 正解は集計？そして、ビルへもメッセージ
 	socket.on("answer", function(data){
-		proj.emit("message", data);
+		proj.emit("message",  {value: data.value});
 		
 	});
 

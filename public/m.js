@@ -20,6 +20,26 @@ if(location.search != ""){
 } else {
     location.href = "a.html";
 }
+
+function myanswer(){
+    var pos = $("#div1").position();
+    var wh = $(window).height();
+    var ww = $(window).width();
+    if (pos.top < wh/2){
+        if (pos.left < ww/2){
+            return 1;
+        }else{
+            return 2;
+        }
+    }else{
+        if (pos.left < ww/2){
+            return 3;
+        }else{
+            return 4;
+        }
+    }
+}
+
 function Init(){
     var team = (Math.floor( Math.random() * 101 ) > 50) ? "red" : "white";
     document.getElementById("team").innerHTML = team;
@@ -38,14 +58,24 @@ $.fn.draggable = function() {
         };
     };
     var moveMe = function(e) {
-        $("#debug").innerHTML = "hoge";
         e.preventDefault();
         var orig = e.originalEvent;
         $(this).css({
             top: orig.changedTouches[0].pageY - offset.y,
             left: orig.changedTouches[0].pageX - offset.x
         });
-        SendMsg("ball", JSON.stringify({method:"move", options:{x:orig.changedTouches[0].pageX - offset.x, y:orig.changedTouches[0].pageY - offset.y,id: socket.io.engine.id,termId:socket.io.engine.id}}));    
+        var xx = orig.changedTouches[0].pageX - offset.x;
+        var yy = orig.changedTouches[0].pageY - offset.y;
+        var off = $("#div1").position();
+        $("#debug").text("(h,w)=(" + $(window).height() + "," + $(window).width() + "), (y,x)=(" + yy +", " + xx + ")"
+                        + " my answer is " + myanswer()
+                        + " off("+off.left+","+off.top+")"
+                        );
+        // $("#debug").text("(h,w)=(" + $(window).height() + "," + $(window).width() + "), (y,x)=(" + yy +", " + xx + ")"
+        //                 + " my answer is " + myanswer(xx, yy));
+
+        // $("#debug").text("(h,w)=(" + $(window).height() + "," + $(window).width() + "), (y,x)=(" + off.top()  +", " + xx + ")"
+        SendMsg("ball", JSON.stringify({method:"move", options:{x:xx, y:yy,id: socket.io.engine.id,termId:socket.io.engine.id}}));    
     };
     this.bind("touchstart", start);
     this.bind("touchmove", moveMe);
@@ -79,6 +109,30 @@ socket.on('connect', function(msg) {
     }));    
 });
 
+
+function answerresult( options ){
+	  if ( options.result == 'true' ){
+		    $("#" + options.id).css( { 'background-color':'rgba(255,255,0,0.8)' });
+
+
+		    timers.push(
+			      setInterval(function(){ $('#' + options.id ).fadeOut(200,function(){$(this).fadeIn(200)}); },200)
+		    );
+
+		    
+
+		    if ( options.team == 'red' ){
+			      score_red++;
+		    }else if ( options.team == 'white' ){
+			      score_white++;
+		    }
+
+		    $( '#score_red' ).html( score_red );
+		    $( '#vs' ).html( ":" );
+		    $( '#score_white' ).html( score_white );
+	  }
+}
+
 // メッセージを受けたとき
 socket.on('message', function(msg) {
     // メッセージを画面に表示する
@@ -92,13 +146,17 @@ socket.on('message', function(msg) {
                 break;
             case "timelimit":
                 //                   if(screen.width / 2)
-                document.getElementById("info").innerHTML = "答えは・・・？";
+                var ans = msgObj.options["answer"];
+                var myans = myanswer();
+                var disp_msg = "答えは" + ans + "!!!<br/>";
+                // disp_msg += "あなたの答えは" + +;
+                document.getElementById("info").innerHTML = disp_msg;
                 SendMsg("answer",
                         {
                             method:"answerresult",
                             options:
                             {
-                                'result':'true',
+                                'result':ans==myans,
                                 'id':socket.io.engine.id,
                                 'team':'red' 
                             }
@@ -116,6 +174,8 @@ socket.on('message', function(msg) {
 // メッセージを送る
 function SendMsg(target,msg) {
     //  var msg = document.getElementById("message").value;
+    // debug
+    // $("#connectId").text(msg);
     // メッセージを発射する
 	  if(target == "ball"){
         socket.emit(target, { value: msg });

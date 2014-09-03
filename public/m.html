@@ -72,9 +72,10 @@
       }
 
       // 動かすオブジェクトの描画
+      var isMouseDown = false;
       $.fn.draggable = function() {
         var offset = null;
-        var start = function(e) {
+        var startTouch = function(e) {
           var orig = e.originalEvent;
           var pos = $(this).position();
           offset = {
@@ -82,7 +83,16 @@
             y: orig.changedTouches[0].pageY - pos.top
           };
         };
-        var moveMe = function(e) {
+        var startMouse = function(e) {
+          isMouseDown = true;
+          var orig = e.originalEvent;
+          var pos = $(this).position();
+          offset = {
+            x: orig.pageX - pos.left,
+            y: orig.pageY - pos.top
+          };
+        };
+        var moveMeTouch = function(e) {
           e.preventDefault();
           var orig = e.originalEvent;
           $(this).css({
@@ -90,9 +100,25 @@
             left: orig.changedTouches[0].pageX - offset.x
           });
           SendMsg("ball", JSON.stringify({method:"move", options:{x:orig.changedTouches[0].pageX - offset.x, y:orig.changedTouches[0].pageY - offset.y,id: socket.io.engine.id,termId:socket.io.engine.id}}));    
-      };
-        this.bind("touchstart", start);
-        this.bind("touchmove", moveMe);
+        };
+        var moveMeMouse = function(e) {
+          if(!isMouseDown) return;
+          e.preventDefault();
+          var orig = e.originalEvent;
+          $(this).css({
+            top: orig.pageY - offset.y,
+            left: orig.pageX - offset.x
+          });
+          SendMsg(JSON.stringify({method:"move", options:{x:orig.pageX - offset.x, y:orig.pageY - offset.y,id: socket.io.engine.id,termId:socket.io.engine.id}}));    
+        };
+        var endMouse = function(e) {
+          isMouseDown = false;
+        };
+        this.bind("touchstart", startTouch);
+        this.bind("mousedown", startMouse);
+        this.bind("touchmove", moveMeTouch);
+        this.bind("mousemove", moveMeMouse);
+        this.bind("mouseup", endMouse);
       };
 
       $(".draggable").draggable();

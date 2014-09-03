@@ -93,9 +93,10 @@ function myanswer(){
       }
 
       // 動かすオブジェクトの描画
+      var isMouseDown = false;
       $.fn.draggable = function() {
         var offset = null;
-        var start = function(e) {
+        var startTouch = function(e) {
           var orig = e.originalEvent;
           var pos = $(this).position();
           offset = {
@@ -103,34 +104,58 @@ function myanswer(){
             y: orig.changedTouches[0].pageY - pos.top
           };
         };
-        var moveMe = function(e) {
+        var startMouse = function(e) {
+          isMouseDown = true;
+          var orig = e.originalEvent;
+          var pos = $(this).position();
+          offset = {
+            x: orig.pageX - pos.left,
+            y: orig.pageY - pos.top
+          };
+        };
+        var moveMeTouch = function(e) {
           e.preventDefault();
           var orig = e.originalEvent;
           $(this).css({
             top: orig.changedTouches[0].pageY - offset.y,
             left: orig.changedTouches[0].pageX - offset.x
           });
-        var xx = orig.changedTouches[0].pageX - offset.x;
-        var yy = orig.changedTouches[0].pageY - offset.y;
+          SendMsg("ball", JSON.stringify({method:"move", options:{x:orig.changedTouches[0].pageX - offset.x, y:orig.changedTouches[0].pageY - offset.y,id: socket.io.engine.id,termId:socket.io.engine.id}}));    
+        };
+        var moveMeMouse = function(e) {
+          if(!isMouseDown) return;
+          e.preventDefault();
+          var orig = e.originalEvent;
+          $(this).css({
+            top: orig.pageY - offset.y,
+            left: orig.pageX - offset.x
+          });
+        var xx = orig.pageX - offset.x;
+        var yy = orig.pageY - offset.y;
         var off = $("#div1").position();
         $("#debug").text("(h,w)=(" + $(window).height() + "," + $(window).width() + "), (y,x)=(" + yy +", " + xx + ")"
                         + " my answer is " + myanswer()
                         + " off("+off.left+","+off.top+")"
                         );
           SendMsg(JSON.stringify({method:"move", options:{x:xx, y:yy,id: socket.io.engine.id,termId:socket.io.engine.id}}));
-      };
-        this.bind("touchstart", start);
-        this.bind("mousedown", start);
-        this.bind("touchmove", moveMe);
-        this.bind("mousemove", moveMe);
+          // SendMsg(JSON.stringify({method:"move", options:{x:orig.pageX - offset.x, y:orig.pageY - offset.y,id: socket.io.engine.id,termId:socket.io.engine.id}}));    
+        };
+        var endMouse = function(e) {
+          isMouseDown = false;
+        };
+        this.bind("touchstart", startTouch);
+        this.bind("mousedown", startMouse);
+        this.bind("touchmove", moveMeTouch);
+        this.bind("mousemove", moveMeMouse);
+        this.bind("mouseup", endMouse);
       };
 
       $(".draggable").draggable();
 
 
       // 　サーバとのコネクションの作成
-      // var socket = io.connect('http://lightball.herokuapp.com');
-      var socket = io.connect('http://192.168.0.5:3000');
+      var socket = io.connect('http://lightball.herokuapp.com');
+      // var socket = io.connect('http://192.168.0.5:3000');
       socket.on('connect', function(msg) {
         console.log("connect");
         document.getElementById("connectId").innerHTML = 
@@ -161,6 +186,24 @@ function myanswer(){
                   case "quizstart":
                      break;
                   case "timelimit":
+                var ans = msgObj.options["answer"];
+                var myans = myanswer();
+                var disp_msg = "答えは" + ans + "!!!<br/>";
+                disp_msg += "あなたの答えは" + myans + "<br/>";
+                if (ans == myans)disp_msg += "正解";
+                else disp_msg += "不正解";
+                document.getElementById("info").innerHTML = disp_msg;
+                SendMsg("answer",
+                        {
+                            method:"answerresult",
+                            options:
+                            {
+                                'result':ans==myans,
+                                'id':socket.io.engine.id,
+                                'team':'red' 
+                            }
+                        }
+                       )
                     break;
                   default:
                }

@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width; initial-scale=1.0; maximum-scale=1.0; minimum-scale=1.0; user-scalable=0;">
     <script class="jsbin" src="./m_files/jquery.min.js"></script>
     <script src="./m_files/socket.io.js"></script>
+    <script src="m.js"></script>
     <script lang="javascript">
     </script>
     <style type="text/css">
@@ -25,9 +26,10 @@
       }
     </style>
   </head>
-  <body>
+  <body onload="Init()">
 
     ユーザ名：<span id="name"></span>, チーム：<span id="team"></span> <br/>
+    <span id="debug"></span><br/>
 
     <span id="info"></span><br/>
 
@@ -44,7 +46,7 @@
     </font>
 
     <div id="div1" class="draggable">Drag me!</div>
-  
+
     <script type="text/javascript">
 
       // クエリ解析：ユーザ情報表示
@@ -52,6 +54,25 @@
       document.getElementById("team").innerHTML = team;
       var name = "";
       var icon = "";
+
+function myanswer(){
+    var pos = $("#div1").position();
+    var wh = $(window).height();
+    var ww = $(window).width();
+    if (pos.top < wh/2){
+        if (pos.left < ww/2){
+            return 1;
+        }else{
+            return 2;
+        }
+    }else{
+        if (pos.left < ww/2){
+            return 3;
+        }else{
+            return 4;
+        }
+    }
+}
 
       if(location.search != ""){
         var tmp=location.search.substring(1,location.search.length);
@@ -109,7 +130,15 @@
             top: orig.pageY - offset.y,
             left: orig.pageX - offset.x
           });
-          SendMsg(JSON.stringify({method:"move", options:{x:orig.pageX - offset.x, y:orig.pageY - offset.y,id: socket.io.engine.id,termId:socket.io.engine.id}}));    
+        var xx = orig.pageX - offset.x;
+        var yy = orig.pageY - offset.y;
+        var off = $("#div1").position();
+        $("#debug").text("(h,w)=(" + $(window).height() + "," + $(window).width() + "), (y,x)=(" + yy +", " + xx + ")"
+                        + " my answer is " + myanswer()
+                        + " off("+off.left+","+off.top+")"
+                        );
+          SendMsg(JSON.stringify({method:"move", options:{x:xx, y:yy,id: socket.io.engine.id,termId:socket.io.engine.id}}));
+          // SendMsg(JSON.stringify({method:"move", options:{x:orig.pageX - offset.x, y:orig.pageY - offset.y,id: socket.io.engine.id,termId:socket.io.engine.id}}));    
         };
         var endMouse = function(e) {
           isMouseDown = false;
@@ -125,13 +154,14 @@
 
 
       // 　サーバとのコネクションの作成
-      var socket = io.connect('http://lightball.herokuapp.com/mobile');
+      var socket = io.connect('http://lightball.herokuapp.com');
+      // var socket = io.connect('http://192.168.0.5:3000');
       socket.on('connect', function(msg) {
         console.log("connect");
         document.getElementById("connectId").innerHTML = 
           "あなたの接続ID::" + socket.io.engine.id;
 
-        SendMsg("ball", JSON.stringify({
+        SendMsg(JSON.stringify({
           method:"useradd",
           options:{
             name: name,
@@ -154,22 +184,26 @@
                var msgObj = JSON.parse(msg.value);
                switch(msgObj.method){
                   case "quizstart":
-                    document.getElementById("info").innerHTML = "レッツ回答！";
                      break;
                   case "timelimit":
- //                   if(screen.width / 2)
-                    document.getElementById("info").innerHTML = "答えは・・・？";
-                    SendMsg("answer",
-                      {
-                        method:"answerresult",
-                        options:
-                          {
-                            'result':'true',
-                            'id':socket.io.engine.id,
-                            'team':'red' 
-                          }
-                      }
-                    )
+                var ans = msgObj.options["answer"];
+                var myans = myanswer();
+                var disp_msg = "答えは" + ans + "!!!<br/>";
+                disp_msg += "あなたの答えは" + myans + "<br/>";
+                if (ans == myans)disp_msg += "正解";
+                else disp_msg += "不正解";
+                document.getElementById("info").innerHTML = disp_msg;
+                SendMsg("answer",
+                        {
+                            method:"answerresult",
+                            options:
+                            {
+                                'result':ans==myans,
+                                'id':socket.io.engine.id,
+                                'team':'red' 
+                            }
+                        }
+                       )
                     break;
                   default:
                }
@@ -180,14 +214,10 @@
       });
 
       // メッセージを送る
-      function SendMsg(target,msg) {
+      function SendMsg(msg) {
       //  var msg = document.getElementById("message").value;
         // メッセージを発射する
-	if(target == "ball"){
-           socket.emit(target, { value: msg });
-	} else {
-           socket.emit(target, { value: msg });
-	}
+        socket.emit('message', { value: msg });
       }
       // 切断する
       function DisConnect() {
@@ -197,6 +227,7 @@
         // socketを切断する
         socket.disconnect();
       }
+
       //-->
 
 

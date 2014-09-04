@@ -265,7 +265,7 @@
                        huseikaiEffect();
                      }
 
-                     SendMsg("answer",
+                     SendMsg("answer", JSON.stringify(
                         {
                            method:"answerresult",
                            options:
@@ -274,7 +274,7 @@
                               'id':socket.io.engine.id,
                               'team':'red' 
                            }
-                        }
+                        })
                      )
                      break;
                   default:

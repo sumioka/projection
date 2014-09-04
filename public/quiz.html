@@ -67,7 +67,7 @@ var ids = new Array();
 
 
 function answerresult( options ){
-	if ( options.result == 'true' ){
+	if ( options.result == true ){
 		$("#" + options.id).css( { 'background-color':'rgba(255,255,0,0.8)' });
 
 
@@ -356,7 +356,7 @@ function DisConnect() {
 <button onClick="javascript:createBall({'team':'red','name':'山岡','id':'123'})">add_yamaoka</button>
 <button onClick="javascript:createBall({'team':'white','name':'角岡','id':'abc'})">add_sumioka</button>
 <button onClick="javascript:timelimit({'answer':'1','description':'私が社長だ！'})">timelimit</button>
-<button onClick="javascript:answerresult({'result':'true','id':'123','team':'red' })">answerresult</button>
+<button onClick="javascript:answerresult({'result':true,'id':'123','team':'red' })">answerresult</button>
 <button onClick="javascript:reset()">reset</button>
 
 

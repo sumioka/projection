@@ -4,19 +4,19 @@
 <script lang="javascript"> 
   function go() {
     var name = document.getElementById("name").value;
-    var icon = document.getElementById("icon").value;
-
     var url = "m.html?name=" + name; 
-    if(icon){
-      url += "&icon=" + icon      
-    }
+//    var icon = document.getElementById("icon").value;
+//
+//    if(icon){
+//      url += "&icon=" + icon      
+//    }
     location.href = url;
   }
 </script>
 
 <style type="text/css">
 <!--
-body {font-size: 32px; color: #ffffff; background-color: #006633; text-align: center}
+body {font-size: 64px; color: #ffffff; background-color: #006633; text-align: center}
 p {font-size: 14px;}
 div {font-size: 14px;}
 td {font-size: 80%;}
@@ -42,27 +42,22 @@ a.nasi:hover {background-color:transparent }
 <br>
 <br>
 <br>
-<br>
-<br>
-<br>
 ようこそクイズマッピングへ<br>
 
 <br>
 <br>
 <br>
-<br>
-ユーザ名：<input id="name" size="6"></input><br>
+おなまえ：<input id="name" size="15" style="font-size:60px"></input><br>
 <br>
 
-アイコンURL：<input id="icon" size="15"></input><br>
+<!--アイコンURL：<input id="icon" size="15"></input><br> -->
 
 <br>
-<br>
-<button onclick="go()">登録</button><br>
+<button onclick="go()" style="font-size:60px">登録</button><br>
 
 <br>
 <br>
-<img src="title.gif">
+<img src="title.gif" width="100%" />
 
 </body>
 </html>

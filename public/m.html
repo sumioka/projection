@@ -40,8 +40,8 @@
   </head>
   <body>
 
-    ○<span id="name"></span> さん　　・・・　　<span id="team"></span><br/>
-    　　　　　<span id="star"></span> 　　　　　　<span id="battle"><br/>
+    <span id="name"></span> さん　<span id="team"></span> 
+    <span id="star"></span> 　<span id="battle"><br/>
     <span id="info"></span><br/>
 
     <table border="1" width="100%">
@@ -257,7 +257,7 @@
                      disp_msg += "あなたの答えは" + myans + "<br/>";
                      if (ans == myans)disp_msg += "正解";
                      else disp_msg += "不正解";
-                     document.getElementById("info").innerHTML = disp_msg;
+                     document.getElementById("debug").innerHTML = disp_msg;
 
                      if (ans == myans) {
                        seikaiEffect();

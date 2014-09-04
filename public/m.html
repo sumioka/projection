@@ -42,7 +42,6 @@
 
     ○<span id="name"></span> さん　　・・・　　<span id="team"></span><br/>
     　　　　　<span id="star"></span> 　　　　　　<span id="battle"><br/>
-    <span id="debug"></span><br/>
     <span id="info"></span><br/>
 
     <table border="1" width="100%">
@@ -63,6 +62,8 @@
       <img id="seikai" src="seikais.png" width="100%" class="seikai"/>
       <img id="huseikai" src="huseikai.png" width="100%" class="seikai"/>
     </div>
+
+    <span id="debug"></span><br/>
 
     <button onclick="seikaiEffect()">正解</button>
     <button onclick="huseikaiEffect()">不正解</button>
@@ -257,6 +258,13 @@
                      if (ans == myans)disp_msg += "正解";
                      else disp_msg += "不正解";
                      document.getElementById("info").innerHTML = disp_msg;
+
+                     if (ans == myans) {
+                       seikaiEffect();
+                     } else {
+                       huseikaiEffect();
+                     }
+
                      SendMsg("answer",
                         {
                            method:"answerresult",
